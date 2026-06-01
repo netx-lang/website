@@ -1,0 +1,67 @@
+/* Language dropdown (landing + docs headers) */
+.lang-menu {
+  position: relative;
+  font-size: 0.8rem;
+}
+.lang-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+}
+.lang-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.lang-menu > summary::marker {
+  content: "";
+}
+.lang-menu > summary:hover,
+.lang-menu[open] > summary {
+  color: var(--navy);
+}
+.lang-menu > summary svg {
+  transition: transform 0.15s ease;
+}
+.lang-menu[open] > summary svg {
+  transform: rotate(180deg);
+}
+.lang-menu ul {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 40;
+  min-width: 7rem;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px -12px rgba(15, 43, 70, 0.35);
+}
+.lang-menu li {
+  margin: 0;
+}
+.lang-menu a {
+  display: block;
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.lang-menu a:hover {
+  background: var(--bg-soft);
+  color: var(--navy);
+}
+.lang-menu a[aria-current="true"] {
+  color: var(--blue);
+  font-weight: 600;
+}

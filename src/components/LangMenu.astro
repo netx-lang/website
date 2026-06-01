@@ -1,0 +1,37 @@
+---
+import type { Lang } from "../i18n/ui";
+import { languages, useTranslations } from "../i18n/ui";
+import { localeUrl } from "../lib/i18n-url";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const path = Astro.url.pathname;
+const codes: Lang[] = ["en", "zh"];
+// Label shows the *other* language, i.e. what you would switch to.
+const other: Lang = lang === "en" ? "zh" : "en";
+const tOther = useTranslations(other);
+---
+
+<details class="lang-menu">
+  <summary aria-label={t("lang.label")}>
+    <span>{tOther("lang.label")}</span>
+    <svg viewBox="0 0 16 16" width="9" height="9" aria-hidden="true">
+      <path d="M4 6.5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </summary>
+  <ul>
+    {codes.map((code) => (
+      <li>
+        <a
+          href={localeUrl(path, code)}
+          aria-current={code === lang ? "true" : undefined}
+        >
+          {languages[code]}
+        </a>
+      </li>
+    ))}
+  </ul>
+</details>

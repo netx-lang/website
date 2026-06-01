@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="25 0 420 178" width="420" height="178">
+  <defs>
+    <!-- OR gate shape from TikZ circuits.logic.US (point left) -->
+    <g id="or">
+      <path d="M 4.410063 -26.452 C -14.488375 -26.452 -31.957125 -16.366062 -41.406344 0.001125 C -31.957125 16.364406 -14.488375 26.450344 4.410063 26.450344 L 30.859281 26.450344 C 26.218656 18.411281 23.773344 9.282375 23.773344 0.001125 C 23.773344 -9.284031 26.218656 -18.409031 30.859281 -26.452 Z"
+            fill="#ffffff" stroke="#3c70b3" stroke-width="3" stroke-linejoin="round"/>
+    </g>
+  </defs>
+
+  <g fill="none" stroke="#2f8f4e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- outputs -->
+    <path d="M145,73.4 H70"/>
+    <path d="M145,119.4 H70"/>
+    <!-- x[1] and x[2] straight into the gate inputs -->
+    <path d="M390,64 H188"/>
+    <path d="M390,110 H188"/>
+    <!-- x[3] feeds both gates, hopping over the x[2] wire -->
+    <path d="M390,156 H290"/>
+    <path d="M290,156 V116 A6,6 0 0 1 290,104 V82.7 H188"/>
+    <path d="M290,156 H250 V128.7 H188"/>
+    <!-- x[0] stub -->
+    <path d="M390,18 H330"/>
+  </g>
+
+  <!-- gates (inputs at centre +/- 9.4), scaled down -->
+  <use href="#or" transform="translate(175,73.4) scale(0.72)"/>
+  <use href="#or" transform="translate(175,119.4) scale(0.72)"/>
+
+  <!-- junction dots -->
+  <g fill="#2f8f4e">
+    <circle cx="70" cy="73.4" r="3.4"/>
+    <circle cx="70" cy="119.4" r="3.4"/>
+    <circle cx="290" cy="156" r="3.4"/>
+    <circle cx="330" cy="18" r="3.4"/>
+  </g>
+
+  <!-- labels -->
+  <g fill="#1c2f42" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="14">
+    <text x="60" y="78.4" text-anchor="end">y[0]</text>
+    <text x="60" y="124.4" text-anchor="end">y[1]</text>
+    <text x="398" y="69" text-anchor="start">x[1]</text>
+    <text x="398" y="115" text-anchor="start">x[2]</text>
+    <text x="398" y="161" text-anchor="start">x[3]</text>
+    <text x="398" y="23" text-anchor="start">x[0]</text>
+  </g>
+</svg>

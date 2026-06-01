@@ -1,0 +1,95 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "antlr",
+  "displayName": "ANTLR",
+  "scopeName": "source.antlr",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#charsets" },
+    { "include": "#keywords" },
+    { "include": "#rule-definition" },
+    { "include": "#labels" },
+    { "include": "#token-names" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.antlr", "match": "//.*$" },
+        { "name": "comment.block.antlr", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.antlr",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            { "name": "constant.character.escape.antlr", "match": "\\\\." }
+          ]
+        }
+      ]
+    },
+    "charsets": {
+      "patterns": [
+        {
+          "name": "constant.other.charset.antlr",
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [
+            { "name": "constant.character.escape.antlr", "match": "\\\\." }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.antlr",
+          "match": "\\b(grammar|lexer|parser|fragment|tokens|channels|import|options|returns|locals|throws|catch|finally|mode|header|members|scope)\\b"
+        },
+        {
+          "name": "keyword.other.antlr",
+          "match": "\\b(skip|more|channel|type|pushMode|popMode|assoc|left|right)\\b"
+        }
+      ]
+    },
+    "rule-definition": {
+      "patterns": [
+        {
+          "name": "entity.name.function.antlr",
+          "match": "^\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=:)"
+        }
+      ]
+    },
+    "labels": {
+      "patterns": [
+        { "name": "entity.name.tag.antlr", "match": "#\\s*[A-Za-z_][A-Za-z0-9_]*" }
+      ]
+    },
+    "token-names": {
+      "patterns": [
+        { "name": "constant.other.antlr", "match": "\\b[A-Z][A-Z0-9_]*\\b" }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.antlr", "match": "\\b[0-9]+\\b" }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.antlr", "match": "->|=>|[|~+*?]|\\.\\.|=|\\+=" }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        { "name": "punctuation.antlr", "match": "[(){}\\[\\],;:]" }
+      ]
+    }
+  }
+}

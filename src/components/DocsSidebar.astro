@@ -1,0 +1,76 @@
+---
+import type { Lang } from "../i18n/ui";
+import { useTranslations } from "../i18n/ui";
+import { docUrl } from "../lib/i18n-url";
+import type { DocNavItem } from "../lib/docs";
+
+interface Props {
+  lang: Lang;
+  nav: DocNavItem[];
+  active?: string;
+}
+const { lang, nav, active } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<aside class="docs-sidebar">
+  <p class="docs-sidebar-title">{t("docs.sidebarTitle")}</p>
+  <nav class="docs-nav" aria-label={t("docs.sidebarTitle")}>
+    <ul>
+      {
+        nav.map((item) => {
+          const isActive = item.slug === active;
+          const hasSections = item.headings.length > 0;
+          const listId = `sections-${item.slug}`;
+          return (
+            <li class:list={["docs-nav-item", { active: isActive }]}>
+              <div class="docs-nav-row">
+                <a
+                  href={docUrl(lang, item.slug)}
+                  class={isActive ? "active" : ""}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {item.title}
+                </a>
+                {hasSections && (
+                  <button
+                    type="button"
+                    class="docs-nav-toggle"
+                    aria-expanded={isActive ? "true" : "false"}
+                    aria-controls={listId}
+                    aria-label={`${t("docs.toggleSections")} — ${item.title}`}
+                  >
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path
+                        d="M4 6.5l4 4 4-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {hasSections && (
+                <ul class="docs-nav-sub" id={listId} hidden={!isActive}>
+                  {item.headings.map((h) => (
+                    <li>
+                      <a
+                        href={`${docUrl(lang, item.slug)}#${h.slug}`}
+                        class={`depth-${h.depth}`}
+                      >
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+  </nav>
+</aside>

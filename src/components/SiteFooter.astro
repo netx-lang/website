@@ -1,0 +1,18 @@
+---
+import type { Lang } from "../i18n/ui";
+import { useTranslations } from "../i18n/ui";
+import { withBase } from "../lib/base";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<footer class="site-footer">
+  <div class="container footer-simple">
+    <img src={withBase("/assets/logo.svg?v=4")} alt="NetX" class="footer-logo" />
+    <p class="footer-license">{t("footer.license")}</p>
+  </div>
+</footer>

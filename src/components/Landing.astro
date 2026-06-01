@@ -1,0 +1,263 @@
+---
+import type { Lang } from "../i18n/ui";
+import { useTranslations } from "../i18n/ui";
+import { docsHome, docUrl } from "../lib/i18n-url";
+import { githubOrg } from "../lib/links";
+import { tabs, encoder } from "../data/examples";
+import { compilerSession, simulatorSession, visualizerSession, backendSession } from "../data/terminal";
+import { cpuCore, netxToml } from "../data/compiler";
+import { simStimuli } from "../data/simulator";
+import { news } from "../data/news";
+import CodeBlock from "./CodeBlock.astro";
+import Terminal from "./Terminal.astro";
+import { withBase } from "../lib/base";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const docs = docsHome(lang);
+// "Read the docs" points at the first specification chapter; the docs home is
+// the install / quick-start page, which is what "Get started" opens. Neither
+// uses a fragment, so no per-language anchor has to be guessed.
+const spec = docUrl(lang, "lexical");
+const showNews = false;
+const tabLabels: Record<string, string> = {
+  adder: t("tabs.adder"),
+  fsm: t("tabs.fsm"),
+  regfile: t("tabs.regfile"),
+};
+---
+
+<section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <h1>
+        <span class="hero-mark" aria-hidden="true"><img src={withBase("/assets/logo-mark.svg?v=4")} alt="" /></span>
+        Net<span class="accent">X</span>
+      </h1>
+      <p class="tagline">{t("hero.tagline")}</p>
+      <p class="lede" set:html={t("hero.lede")} />
+      <div class="cta-row">
+        <a class="btn btn-primary" href={githubOrg} target="_blank" rel="noopener">{t("hero.getStarted")}</a>
+        <a class="btn btn-ghost" href={spec}>{t("hero.docs")}</a>
+        <a class="btn btn-ghost" href={withBase("/assets/netx-paper.pdf")}>{t("hero.paper")}</a>
+      </div>
+
+      {showNews && (
+      <div class="news">
+        <p class="news-title">{t("news.title")}</p>
+        <ul class="news-list">
+          {news.map((item) => (
+            <li class="news-item">
+              <span class="news-date">{item.date}</span>
+              {item.href ? (
+                <a class="news-text" href={item.href} target="_blank" rel="noopener">{item.text[lang]}</a>
+              ) : (
+                <span class="news-text">{item.text[lang]}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+      )}
+    </div>
+
+    <figure class="hero-card">
+      <div class="hero-card-code">
+        <span class="hero-card-filename">{t("hero.codeCaption")}</span>
+        <CodeBlock code={encoder} />
+      </div>
+      <figcaption class="hero-card-fig">
+        <img
+          src={withBase("/assets/fig-encoder.svg")}
+          alt="A 4-to-2 encoder schematic: OR gates combine the one-hot input x[0..3] into y[0..1]."
+        />
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="section section-soft" id="overview">
+  <div class="container">
+    <p class="section-kicker">{t("overview.kicker")}</p>
+    <h2 class="section-title">{t("overview.title")}</h2>
+    <p class="section-lead" set:html={t("overview.lead")} />
+
+    <div class="feature-grid">
+      <article class="feature">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h5l2-6 4 12 2-6h5"/></svg>
+        </div>
+        <h3>{t("feature.core.title")}</h3>
+        <p set:html={t("feature.core.body")} />
+      </article>
+      <article class="feature">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3v6M8 15v6M16 3v6M16 15v6"/><rect x="5" y="9" width="6" height="6" rx="1"/><rect x="13" y="9" width="6" height="6" rx="1"/></svg>
+        </div>
+        <h3>{t("feature.meta.title")}</h3>
+        <p set:html={t("feature.meta.body")} />
+      </article>
+      <article class="feature">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l7 4v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V7z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h3>{t("feature.formal.title")}</h3>
+        <p set:html={t("feature.formal.body")} />
+      </article>
+    </div>
+
+    <figure class="figure-card full">
+      <img
+        src={withBase("/assets/fig-adder.svg")}
+        alt="A 4-bit ripple-carry adder built from a chain of full adders, with the repeating pattern abstracted as a parameterized macro."
+      />
+      <figcaption>{t("adder.caption")}</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="section" id="language">
+  <div class="container">
+    <p class="section-kicker">{t("language.kicker")}</p>
+    <h2 class="section-title">{t("language.title")}</h2>
+    <p class="section-lead">{t("language.lead")}</p>
+
+    <div class="tabs" data-tabs>
+      <div class="tablist" role="tablist" aria-label={t("language.title")}>
+        {tabs.map((tab, i) => (
+          <button
+            role="tab"
+            id={`tab-${tab.id}`}
+            aria-controls={`panel-${tab.id}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            data-tab={tab.id}
+          >
+            {tabLabels[tab.id]}
+          </button>
+        ))}
+      </div>
+      <div class="tabpanels">
+        {tabs.map((tab, i) => (
+          <div
+            class="tabpanel"
+            role="tabpanel"
+            id={`panel-${tab.id}`}
+            aria-labelledby={`tab-${tab.id}`}
+            data-panel={tab.id}
+            hidden={i !== 0}
+          >
+            <CodeBlock code={tab.code} />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <p class="docs-cta" set:html={t("language.cta").replace("{docs}", docs)} />
+  </div>
+</section>
+
+<section class="section section-soft" id="toolchain">
+  <div class="container">
+    <p class="section-kicker">{t("toolchain.kicker")}</p>
+    <h2 class="section-title">{t("toolchain.title")}</h2>
+    <p class="section-lead" set:html={t("toolchain.lead")} />
+    <figure class="figure-card full">
+      <img
+        src={withBase("/assets/fig-compile.svg")}
+        alt="NetX toolchain: NetX source code and the standard library feed the NetX compiler, which emits NXON; the compiler also backs LSP support and the package manager. NXON feeds DOT/Graphviz rendering, C++ simulation, and a strict subset of structural Verilog for backend EDA tools."
+      />
+    </figure>
+
+    <div class="tabs" data-tabs data-autoplay="4000">
+      <div class="tabbar">
+      <div class="tablist" role="tablist" aria-label={t("toolchain.title")}>
+        <button role="tab" id="tool-tab-compiler" aria-controls="tool-panel-compiler" aria-selected="true" data-tab="compiler">
+          {t("tool.compiler.title")}
+        </button>
+        <button role="tab" id="tool-tab-simulator" aria-controls="tool-panel-simulator" aria-selected="false" data-tab="simulator">
+          {t("tool.simulator.title")}
+        </button>
+        <button role="tab" id="tool-tab-visualizer" aria-controls="tool-panel-visualizer" aria-selected="false" data-tab="visualizer">
+          {t("tool.visualizer.title")}
+        </button>
+        <button role="tab" id="tool-tab-backend" aria-controls="tool-panel-backend" aria-selected="false" data-tab="backend">
+          {t("tool.backend.title")}
+        </button>
+      </div>
+      <button
+        type="button"
+        class="tab-autoplay"
+        data-autoplay-toggle
+        data-state="playing"
+        data-label-pause={t("toolchain.autoplay.pause")}
+        data-label-play={t("toolchain.autoplay.play")}
+        aria-label={t("toolchain.autoplay.pause")}
+        title={t("toolchain.autoplay.pause")}
+      >
+        <svg class="ico-pause" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><rect x="3.4" y="2.6" width="3" height="10.8" rx="1.2" fill="currentColor"/><rect x="9.6" y="2.6" width="3" height="10.8" rx="1.2" fill="currentColor"/></svg>
+        <svg class="ico-play" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M5.2 2.8v10.4L13.4 8z" fill="currentColor"/></svg>
+      </button>
+      </div>
+      <div class="tabpanels">
+        <div class="tabpanel" role="tabpanel" id="tool-panel-compiler" aria-labelledby="tool-tab-compiler" data-panel="compiler">
+          <p class="tool-desc">{t("tool.compiler.body")}</p>
+          <div class="compiler-grid">
+            <div class="compiler-code">
+              <p class="panel-label">src/rv32i.nx</p>
+              <CodeBlock code={cpuCore} />
+            </div>
+            <div class="compiler-config">
+              <p class="panel-label">_netx.toml</p>
+              <CodeBlock code={netxToml} lang="toml" />
+            </div>
+            <div class="compiler-term">
+              <Terminal session={compilerSession} title="nx compile" />
+            </div>
+          </div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tool-panel-simulator" aria-labelledby="tool-tab-simulator" data-panel="simulator" hidden>
+          <p class="tool-desc">{t("tool.simulator.body")}</p>
+          <div class="sim-grid">
+            <div class="sim-code">
+              <p class="panel-label">main.cpp</p>
+              <CodeBlock code={simStimuli} lang="cpp" />
+            </div>
+            <Terminal session={simulatorSession} title={"make & run"} />
+          </div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tool-panel-visualizer" aria-labelledby="tool-tab-visualizer" data-panel="visualizer" hidden>
+          <p class="tool-desc">{t("tool.visualizer.body")}</p>
+          <Terminal session={visualizerSession} title="nx dump dot" />
+          <figure class="cpu-view-figure">
+            <img
+              src={withBase("/assets/cpu-view.jpg")}
+              alt="The full CORE design rendered from its Graphviz DOT graph."
+            />
+            <figcaption>{t("toolchain.cpuview.caption")}</figcaption>
+          </figure>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tool-panel-backend" aria-labelledby="tool-tab-backend" data-panel="backend" hidden>
+          <p class="tool-desc">{t("tool.backend.body")}</p>
+          <div class="backend-grid">
+            <Terminal session={backendSession} title="nx dump verilog" />
+            <figure class="backend-figure">
+              <img
+                src={withBase("/assets/fpga.jpg")}
+                alt="A DE2-115 FPGA board running the NetX RV32I system, connected to a monitor showing a Scheme REPL and a PS/2 keyboard."
+              />
+              <figcaption>{t("toolchain.fpga.caption")}</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="terminal-note">
+      {t("terminal.note")} NetX-RISC-V
+    </p>
+  </div>
+</section>

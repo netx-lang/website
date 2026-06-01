@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from "astro:content";
+import { getDocsTree } from "../../../lib/docs";
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import { ENABLE_I18N } from "../../../lib/features";
+
+const lang = "zh" as const;
+
+export async function getStaticPaths() {
+  // English-only for now; see src/lib/features.ts.
+  if (!ENABLE_I18N) return [];
+  const entries = await getCollection("docs");
+  return entries
+    .filter((entry) => entry.id.startsWith("zh/") && !entry.id.endsWith("/index"))
+    .map((entry) => ({
+      params: { slug: entry.id.split("/")[1] },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const nav = await getDocsTree(lang);
+const { Content } = await render(entry);
+const slug = entry.id.split("/")[1];
+---
+
+<DocsLayout lang={lang} title={entry.data.title} nav={nav} active={slug}>
+  <Content />
+</DocsLayout>

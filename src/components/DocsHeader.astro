@@ -1,0 +1,28 @@
+---
+import type { Lang } from "../i18n/ui";
+import { useTranslations } from "../i18n/ui";
+import { docsHome } from "../lib/i18n-url";
+import LangMenu from "./LangMenu.astro";
+import { ENABLE_I18N } from "../lib/features";
+import { withBase } from "../lib/base";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<header class="docs-header">
+  <a class="docs-brand" href={withBase(lang === "en" ? "/" : "/zh/")}>
+    <img src={withBase("/assets/logo-mark.svg?v=4")} alt="" />
+    <span>Net<span class="brand-x">X</span></span>
+  </a>
+  <span class="docs-divider">/</span>
+  <a class="docs-section" href={docsHome(lang)}>{t("docs.label")}</a>
+  {ENABLE_I18N && (
+    <nav class="docs-topnav">
+      <LangMenu lang={lang} />
+    </nav>
+  )}
+</header>

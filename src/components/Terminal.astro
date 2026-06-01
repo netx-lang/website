@@ -1,0 +1,55 @@
+---
+import type { TermLine } from "../data/terminal";
+
+interface Props {
+  session: TermLine[];
+  title?: string;
+}
+const { session, title } = Astro.props;
+---
+
+<div class="terminal">
+  {
+    title && (
+      <div class="terminal-head">
+        <span class="terminal-title">{title}</span>
+      </div>
+    )
+  }
+  <div class="terminal-body">
+    {
+      session.map((line) => {
+        switch (line.kind) {
+          case "cmd":
+            return (
+              <div class="term-line">
+                <span class="term-prompt">$</span>
+                <span class="term-cmd">{line.text}</span>
+              </div>
+            );
+          case "info":
+            return <div class="term-line term-info">{line.text}</div>;
+          case "warn":
+            return <div class="term-line term-warn">{line.text}</div>;
+          case "heading":
+            return <div class="term-line term-heading">{line.text}</div>;
+          case "test":
+            return (
+              <div class="term-line">
+                <span class="term-name">{line.text}</span>
+                <span class="term-ok">{"  -> Passed!"}</span>
+              </div>
+            );
+          case "summary":
+            return <div class="term-line term-summary">{line.text}</div>;
+          case "time":
+            return <div class="term-line term-time">{line.text}</div>;
+          case "blank":
+            return <div class="term-line term-blank" />;
+          default:
+            return <div class="term-line term-out">{line.text}</div>;
+        }
+      })
+    }
+  </div>
+</div>

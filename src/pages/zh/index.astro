@@ -1,0 +1,14 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Landing from "../../components/Landing.astro";
+import { ENABLE_I18N } from "../../lib/features";
+import { withBase } from "../../lib/base";
+
+// English-only for now: keep the route so old links keep working, but send
+// visitors to the English site.
+if (!ENABLE_I18N) return Astro.redirect(withBase("/"));
+---
+
+<BaseLayout lang="zh">
+  <Landing lang="zh" />
+</BaseLayout>

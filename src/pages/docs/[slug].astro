@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from "astro:content";
+import { getDocsTree } from "../../lib/docs";
+import DocsLayout from "../../layouts/DocsLayout.astro";
+
+const lang = "en" as const;
+
+export async function getStaticPaths() {
+  const entries = await getCollection("docs");
+  return entries
+    .filter((entry) => entry.id.startsWith("en/") && !entry.id.endsWith("/index"))
+    .map((entry) => ({
+      params: { slug: entry.id.split("/")[1] },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const nav = await getDocsTree(lang);
+const { Content } = await render(entry);
+const slug = entry.id.split("/")[1];
+---
+
+<DocsLayout lang={lang} title={entry.data.title} nav={nav} active={slug}>
+  <Content />
+</DocsLayout>

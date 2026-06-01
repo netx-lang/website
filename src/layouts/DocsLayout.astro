@@ -1,0 +1,57 @@
+---
+import type { Lang } from "../i18n/ui";
+import { useTranslations } from "../i18n/ui";
+import { localeUrl } from "../lib/i18n-url";
+import DocsHeader from "../components/DocsHeader.astro";
+import DocsSidebar from "../components/DocsSidebar.astro";
+import HeadFonts from "../components/HeadFonts.astro";
+import type { DocNavItem } from "../lib/docs";
+import "../styles/docs.css";
+import "../styles/lang-menu.css";
+import "katex/dist/katex.min.css";
+import { withBase } from "../lib/base";
+import { ENABLE_I18N } from "../lib/features";
+
+interface Props {
+  lang: Lang;
+  title: string;
+  nav: DocNavItem[];
+  active?: string;
+}
+const { lang, title, nav, active } = Astro.props;
+const t = useTranslations(lang);
+const path = Astro.url.pathname;
+---
+
+<!DOCTYPE html>
+<html lang={lang === "zh" ? "zh-CN" : "en"}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} · NetX</title>
+    <meta name="description" content={t("meta.description")} />
+    <HeadFonts />
+    <link rel="icon" type="image/svg+xml" href={withBase("/assets/logo-mark.svg?v=4")} />
+    {ENABLE_I18N && (
+      <>
+        <link rel="alternate" hreflang="en" href={localeUrl(path, "en")} />
+        <link rel="alternate" hreflang="zh" href={localeUrl(path, "zh")} />
+      </>
+    )}
+  </head>
+  <body>
+    <DocsHeader lang={lang} />
+    <div class="docs-layout">
+      <DocsSidebar lang={lang} nav={nav} active={active} />
+      <main class="docs-content">
+        <article>
+          <slot />
+        </article>
+      </main>
+    </div>
+    <footer class="docs-footer">
+      <p>{t("docs.footer")}</p>
+    </footer>
+    <script>import "../scripts/main.js";</script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+---
+import type { Lang } from "../i18n/ui";
+import { useTranslations } from "../i18n/ui";
+import LangMenu from "./LangMenu.astro";
+import { withBase } from "../lib/base";
+import { docsHome } from "../lib/i18n-url";
+import { ENABLE_I18N } from "../lib/features";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a class="brand" href="#top" aria-label="NetX">
+      <img src={withBase("/assets/logo-mark.svg?v=4")} alt="" class="brand-mark" />
+      <span class="brand-name">Net<span class="brand-x">X</span></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href={docsHome(lang)}>{t("nav.docs")}</a>
+      {ENABLE_I18N && <LangMenu lang={lang} />}
+    </nav>
+    <button class="nav-toggle" aria-label={t("nav.menu")} aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>

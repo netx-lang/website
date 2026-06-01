@@ -1,0 +1,198 @@
+---
+title: The NXON Backend Representation
+order: 7
+---
+
+# The NXON Backend Representation
+
+The NXON backend representation is a low-level, JSON-based format that specifies the circuit schematic defined in NetX source code.
+The representation fully expands the component hierarchy and flattens all arrays and bundles into individual wires, making it suitable for backend tools such as simulators, synthesizers, and visualizers.
+
+## Top-Level Structure
+
+The expanded NXON representation is a JSON object containing two fields:
+
+- `total`: the total number of wires in the circuit design.
+  Note that arrays and bundles are flattened to individual wires in this representation, as discussed in the section on signal type.
+- `top_input` and `top_output`: the two arrays of strings representing the original input and output port names defined in the top-level component header. Since alias analysis may replace the original port names with aliases, these fields contain the original names to facilitate simulation and debugging.
+- `design`: the JSON object representing the top-level component of the circuit design.
+
+## Component
+
+Each component is represented as a JSON object with the following fields:
+
+- `type`: set to `"component"` for component objects.
+- `id`: the unique identifier of the component.
+- `loc`: the row and column location of the component definition in the NetX source code, represented as a string in the format `"row:col"`.
+- `attribute`: a JSON object containing key-value pairs of attributes defined in the NetX source code (if any).
+- `inputs`: an array of identifier strings representing the wires that the component should read signals from.
+- `outputs`: an array of identifier strings representing the wires that the component should write signals to.
+- `members`: an array of JSON objects representing the member components within this component.
+
+For example, here is a valid NXON representation of a simple component:
+
+```nxon
+{
+  "total": 35,
+  "design": {
+    "type": "component",
+    "id": "top",
+    "loc": "1:10",
+    "input": ["a@0", "b@1"],
+    "output": ["c@2"],
+    "attribute": {"width": "32"},
+    "members": [
+      ...
+    ]
+  }
+}
+```
+
+Note that the input and output identifiers follow the format `"name@id"`, where `name` is the wire name and `id` is the unique integer identifier for the wire.
+For more complex scenarios, the identifiers may take the following forms:
+
+- `"name@id[selector]"` for wires with selectors.
+  For example, `"a@0[1]"` and `"a@0[3:1]"` are valid identifiers for wires with selectors.
+- `"arr[0]@4"`, `"arr[1]@5"`, `"package.valid@142"`, etc., for wires whose names have been flattened from arrays or blasted from bundles.
+- `"arr[0].valid@4[0]"` or `"arr[0]@142[3:1]"` for flattened and blasted names that are further selected.
+
+The only restriction on the integer identifiers used in the wire names is that they must be unique, meaning that they can be arbitrary integers, but no two wires can have the same identifier.
+
+## Wire
+
+Each wire is represented as a JSON object inside the `members` array of a component.
+The wire object has the following fields:
+
+- `type`: set to `"wire"` for wire objects.
+- `id`: the unique identifier of the wire.
+- `width`: the width of the wire, represented as an integer.
+- `loc`: the source code location of the wire declaration.
+
+For example, a wire object might look like this:
+
+```nxon
+"members": [
+    {"type": "wire", "width": 8, "id": "a@0", "loc": "2:27"},
+    {"type": "wire", "width": 8, "id": "b@1", "loc": "2:30"},
+    {"type": "wire", "width": 8, "id": "c@2", "loc": "2:9"},
+    ...
+]
+```
+
+## Built-in Components
+
+Built-in components are represented similarly to user-defined components and contain the following fields:
+
+- `type`: set to `"builtin"` for built-in components.
+- `id`: the unique identifier of the built-in component.
+- `loc`: the source code location where the built-in component is referenced.
+- `attribute`: a JSON object containing key-value pairs of attributes defined in the NetX source code (for `REGISTER` and `ASYNC_REGISTER`).
+- `inputs`: a JSON object mapping input port names to their corresponding wire identifiers.
+- `outputs`: a JSON object mapping output port names to their corresponding wire identifiers.
+- `members`: an array of JSON objects representing the member components within this built-in component.
+  Note that members of built-in components contain only wires, as built-in components do not contain other sub-components.
+
+For example, a built-in component might look like this:
+
+```nxon
+"members": [
+  {
+    "type": "builtin", "id": "REGISTER", "loc": "5:29",
+    "input": ["a@2", "clk@0"],
+    "output": ["b@3"],
+    "attribute": {"pos_edge": "true"}
+  },
+  {
+    "type": "builtin", "id": "OR", "loc": "11:13",
+    "input": ["b@3", "c@4"],
+    "output": ["clk_3@1"]
+  },
+  ...
+]
+```
+
+Here, identifiers that begin with a dollar sign ($) are generated by the compiler as necessary intermediate wires.
+
+## Example
+
+For the following NetX source code:
+
+```netx
+component HA : [a, b] -> [sum, carry] {
+  wire a, b, sum, carry of bit(1);
+  sum <> XOR <> [a, b];
+  carry <> AND <> [a, b];
+}
+component FA : [a, b, cin] -> [sum, cout] {
+  wire a, b, cin, sum, cout of bit(1);
+  [sum, cout] <> [TO, OR] 
+              <> [HA, TO] 
+              <> [TO, HA] <> [a, b, cin];
+}
+```
+
+The expanded NXON representation of the above design is as follows:
+
+```nxon
+{
+  "total": 8,
+  "top_input": ["a", "b", "cin"],
+  "top_output": ["sum", "cout"],
+  "design": {
+    "type": "component",
+    "id": "FA",
+    "loc": "7:10",
+    "input": ["a@0", "b@1", "cin@2"],
+    "output": ["sum@3", "cout@4"],
+    "members": [
+      {"type": "wire", "width": 1, "id": "a@0", "loc": "8:9"},
+      {"type": "wire", "width": 1, "id": "b@1", "loc": "8:12"},
+      {"type": "wire", "width": 1, "id": "cin@2", "loc": "8:15"},
+      {"type": "wire", "width": 1, "id": "sum@3", "loc": "8:20"},
+      {"type": "wire", "width": 1, "id": "cout@4", "loc": "8:25"},
+      {
+        "type": "component", "id": "HA", "loc": "11:24",
+        "input": ["b@1", "cin@2"],
+        "output": ["sum@5", "carry@6"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "sum@5", "loc": "2:15"},
+          {"type": "wire", "width": 1, "id": "carry@6", "loc": "2:20"},
+          {
+            "type": "builtin", "id": "XOR", "loc": "3:11",
+            "input": ["b@1", "cin@2"],
+            "output": ["sum@5"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "4:13",
+            "input": ["b@1", "cin@2"],
+            "output": ["carry@6"]
+          }
+        ]
+      },
+      {
+        "type": "component", "id": "HA", "loc": "10:20",
+        "input": ["a@0", "sum@5"],
+        "output": ["sum@3", "carry@7"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "carry@7", "loc": "2:20"},
+          {
+            "type": "builtin", "id": "XOR", "loc": "3:11",
+            "input": ["a@0", "sum@5"],
+            "output": ["sum@3"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "4:13",
+            "input": ["a@0", "sum@5"],
+            "output": ["carry@7"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "9:24",
+        "input": ["carry@7", "carry@6"],
+        "output": ["cout@4"]
+      }
+    ]
+  }
+}
+```

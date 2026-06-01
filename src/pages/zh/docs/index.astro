@@ -1,0 +1,19 @@
+---
+import { getEntry, render } from "astro:content";
+import { getDocsTree } from "../../../lib/docs";
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import { ENABLE_I18N } from "../../../lib/features";
+import { withBase } from "../../../lib/base";
+
+const lang = "zh" as const;
+
+// English-only for now; see src/lib/features.ts.
+if (!ENABLE_I18N) return Astro.redirect(withBase("/docs/"));
+const nav = await getDocsTree(lang);
+const entry = await getEntry("docs", "zh");
+const { Content } = await render(entry);
+---
+
+<DocsLayout lang={lang} title={entry.data.title} nav={nav} active="index">
+  <Content />
+</DocsLayout>

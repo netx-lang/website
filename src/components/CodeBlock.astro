@@ -1,0 +1,16 @@
+---
+import { Code } from "astro:components";
+import { netx, theme } from "../shiki/index";
+
+interface Props {
+  code: string;
+  lang?: string;
+  small?: boolean;
+}
+const { code, lang = "netx", small = false } = Astro.props;
+const resolvedLang: any = lang === "netx" ? netx : lang;
+---
+
+<div class:list={["code-frame", { small }]}>
+  <Code code={code} lang={resolvedLang} theme={theme as any} />
+</div>
